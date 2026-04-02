@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block contnent %}
+
+<h1>Форма</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <fieldset>
+        <legend>Основное</legend>
+        {{ form.as_p }}
+    </fieldset>
+
+
+
+        <!-- Поверки -->
+        <fieldset>
+            <legend>Комментарии (можно оставить пустыми)</legend>
+            {{ comment_formset.management_form }}
+
+            {% for form in comment_formset %}
+                <div class="verification-form">
+                    {{ form.as_p }}
+                    {% if form.instance.pk %}
+                        <label>{{ form.DELETE }} Удалить эту поверку</label>
+                    {% endif %}
+                </div>
+                <hr>
+            {% endfor %}
+        </fieldset>
+
+        <button type="submit">Сохранить</button>
+
+</form>
+
+
+
+{% endblock %}
