@@ -1,0 +1,16 @@
+asgiref==3.11.1
+black==26.5.1
+click==8.4.1
+Django==6.0.5
+django-bootstrap==0.2.4
+django-bootstrap5==26.2
+djhtml==3.0.11
+dotenv==0.9.9
+mypy_extensions==1.1.0
+packaging==26.2
+pathspec==1.1.1
+pillow==12.2.0
+platformdirs==4.10.0
+python-dotenv==1.2.2
+pytokens==0.4.1
+sqlparse==0.5.5

@@ -1,0 +1,39 @@
+{# templates/poem/poem_form.html #}
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}{% if form.instance.pk %}Редактировать{% else %}Новое стихотворение{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-{% if form.instance.pk %}edit{% else %}pen-fancy{% endif %} me-2"></i>
+                        {% if form.instance.pk %}Редактирование стихотворения{% else %}Новое стихотворение{% endif %}
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% bootstrap_form form %}
+
+                        <div class="d-flex justify-content-between gap-3 mt-4">
+                            <a href="{% url 'poem:list' %}" class="btn btn-secondary rounded-pill px-4">
+                                <i class="fas fa-times me-1"></i> Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                <i class="fas fa-save me-1"></i>
+                                {% if form.instance.pk %}Сохранить{% else %}Опубликовать{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

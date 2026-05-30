@@ -1,0 +1,235 @@
+{# templates/base.html #}
+{% load django_bootstrap5 %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Poetry Hub - платформа для публикации и чтения стихов">
+    <title>Poetry Hub {% block title %}{% if title %} | {{ title }}{% endif %}{% endblock %}</title>
+
+    {# Bootstrap 5 CSS #}
+    {% bootstrap_css %}
+
+    {# Font Awesome 6 #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    {# Google Fonts #}
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    {# Custom CSS #}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<style>
+    /* Дополнительные стили для форм */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    transition: all 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="url"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate__fadeInUp {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Карточки */
+.card {
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+}
+</style>
+<body>
+    {# Навигация #}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'poem:list' %}">
+                <i class="fas fa-feather-alt me-2"></i>
+                <span class="fw-bold">Poetry Hub</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'list' %}active{% endif %}"
+                           href="{% url 'poem:list' %}">
+                            <i class="fas fa-book-open me-1"></i> Стихи
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'create' %}active{% endif %}"
+                               href="{% url 'poem:create' %}">
+                                <i class="fas fa-pen-fancy me-1"></i> Написать
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'my_poems' %}active{% endif %}"
+                               href="{% url 'poem:my_poems' %}">
+                                <i class="fas fa-folder-open me-1"></i> Мои стихи
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                               data-bs-toggle="dropdown">
+                                {% if user.poet_profile.avatar %}
+                                    <img src="{{ user.poet_profile.avatar.url }}"
+                                         class="rounded-circle me-1"
+                                         style="width: 32px; height: 32px; object-fit: cover;">
+                                {% else %}
+                                    <i class="fas fa-user-circle fa-lg me-1"></i>
+                                {% endif %}
+                                {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'poem:profile' %}">
+                                        <i class="fas fa-id-card me-2"></i> Профиль
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'poem:profile_edit' %}">
+                                        <i class="fas fa-user-edit me-2"></i> Редактировать
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="fas fa-sign-out-alt me-2"></i> Выйти
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i> Войти
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-outline-light rounded-pill px-3 ms-2"
+                               href="{% url 'signup' %}">
+                                <i class="fas fa-user-plus me-1"></i> Регистрация
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {# Сообщения #}
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# Основной контент #}
+    <main class="py-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {# Футер #}
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5><i class="fas fa-feather-alt me-2"></i>Poetry Hub</h5>
+                    <p class="text-muted">Платформа для поэтов и ценителей поэзии. Делитесь своими стихами, вдохновляйте других.</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5>Навигация</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'poem:list' %}" class="text-muted text-decoration-none">Все стихи</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'poem:create' %}" class="text-muted text-decoration-none">Написать стих</a></li>
+                            <li><a href="{% url 'poem:my_poems' %}" class="text-muted text-decoration-none">Мои стихи</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <h5>Социальные сети</h5>
+                    <div class="social-links">
+                        <a href="#" class="text-muted me-3"><i class="fab fa-telegram fa-2x"></i></a>
+                        <a href="#" class="text-muted me-3"><i class="fab fa-vk fa-2x"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-github fa-2x"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="bg-secondary">
+            <div class="text-center text-muted">
+                <small>&copy; 2026 Poetry Hub. Все права защищены.</small>
+            </div>
+        </div>
+    </footer>
+
+    {# Bootstrap JS #}
+    {% bootstrap_javascript %}
+
+    {# jQuery для AJAX #}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    {# Custom JS #}
+    <script src="{% static 'js/main.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
